@@ -1,39 +1,32 @@
-
 name: Synchronize to forked repo
 on:
-push:
-branches:
-  - main
+  push:
+    branches:
+      - main
 
 jobs:
-sync:
-name: Sync forked repo
-runs-on: ubuntu-latest
+  sync:
+    name: Sync forked repo
+    runs-on: ubuntu-latest
 
-steps:
-- name: Checkout main 
-uses: actions/checkout@v4 
-- name: Use Node.js 
-uses: actions/setup-node@v4 
-	with:
-		node-version: 21.4.0 
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.FORKED_REPO_TOKEN }}
+          fetch-depth: 0
+          ref: main
 
-	- name: Install dependencies 
-	run: yarn install
+      - name: Add remote-url
+        run: |
+          git remote add forked-repo https://exceptanyone:${{ secrets.FORKED_REPO_TOKEN }}@github.com/exceptanyone/Spotify-FE
+          git config user.name exceptanyone
+          git config user.email wjddks96@naver.com
 
-	- name: Build project 
-	run: yarn run build
+      - name: Push changes to forked-repo
+        run: |
+          git push -f forked-repo main
 
-	- name: Add remote-url
-	run: |
-		git remote add forked-repo https://exceptanyone:${{ secrets.FORKED_REPO_TOKEN }}@github.com/exceptanyone/github-action-practice
-		git config user.name exceptanyone
-		git config user.email wjddks96@naver.com
-
-	- name: Push changes to forked-repo 
-	run: |
-		git push -f forked-repo main
-
-	- name: Clean up 
-	run: |
-		git remote remove forked-repo
+      - name: Clean up
+        run: |
+          git remote remove forked-repo
