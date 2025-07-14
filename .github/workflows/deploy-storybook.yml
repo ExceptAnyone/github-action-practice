@@ -1,0 +1,53 @@
+name: Deploy Storybook
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'src/**/*.stories.tsx'
+      - 'src/**/*.stories.ts'
+      - 'src/**/*.mdx'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-storybook:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Deploy with Chromatic
+        id: chromatic
+        uses: chromaui/action@v1
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          buildScriptName: build-storybook
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Slack 알림
+      - name: Slack deployment notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#fe_storybook'
+          text: |
+            🚀 "${{ github.event.pull_request.title }}" 의 변경사항이 Storybook에 배포되었습니다!
+
+            👉 ${{ steps.chromatic.outputs.storybookUrl }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
