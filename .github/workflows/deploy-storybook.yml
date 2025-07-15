@@ -4,9 +4,9 @@ on:
   pull_request:
     types: [closed]
     paths:
-      - 'src/**/*.stories.tsx'
-      - 'src/**/*.stories.ts'
-      - 'src/**/*.mdx'
+      - 'client/**/*.stories.tsx'
+      - 'client/**/*.stories.ts'
+      - 'client/**/*.mdx'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy-storybook:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'fe/dev'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,24 +22,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'yarn'
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/pnpm-setup-node
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        working-directory: ./client
+        run: pnpm install --frozen-lockfile
 
       - name: Deploy with Chromatic
         id: chromatic
-        uses: chromaui/action@v1
+        uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: ./client
           buildScriptName: build-storybook
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Slack 알림
       - name: Slack deployment notification
         uses: 8398a7/action-slack@v3
         with:

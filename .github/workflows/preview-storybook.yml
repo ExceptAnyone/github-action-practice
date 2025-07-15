@@ -2,12 +2,12 @@ name: Preview Storybook
 
 on:
   pull_request:
-    paths:
-      - 'src/**/*.stories.tsx'
-      - 'src/**/*.stories.ts'
-      - 'src/**/*.mdx'
     types: [opened, reopened, synchronize]
-    branches: ['main']
+    paths:
+      - 'client/**/*.stories.tsx'
+      - 'client/**/*.stories.ts'
+      - 'client/**/*.mdx'
+    branches: ['fe/dev']
   workflow_dispatch:
 
 concurrency:
@@ -23,20 +23,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'yarn'
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/pnpm-setup-node
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        working-directory: ./client
+        run: pnpm install --frozen-lockfile
 
       - name: Deploy Chromatic Preview
         id: chromatic
         uses: chromaui/action@v1
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: ./client
           buildScriptName: build-storybook
           token: ${{ secrets.GITHUB_TOKEN }}
           onlyChanged: true
