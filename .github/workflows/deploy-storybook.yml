@@ -26,7 +26,6 @@ jobs:
         uses: ./.github/actions/pnpm-setup-node
 
       - name: Install dependencies
-        working-directory: ./client
         run: pnpm install --frozen-lockfile
 
       - name: Deploy with Chromatic
@@ -34,7 +33,6 @@ jobs:
         uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          workingDir: ./client
           buildScriptName: build-storybook
           token: ${{ secrets.GITHUB_TOKEN }}
 
