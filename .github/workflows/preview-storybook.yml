@@ -7,7 +7,7 @@ on:
       - 'client/**/*.stories.tsx'
       - 'client/**/*.stories.ts'
       - 'client/**/*.mdx'
-    branches: ['fe/dev']
+    branches: ['main']
   workflow_dispatch:
 
 concurrency:
