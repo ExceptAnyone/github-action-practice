@@ -12,6 +12,9 @@
     "build-storybook": "storybook build",
     "prepare": "husky"
   },
+  "engines": {
+    "node": ">=20.18.0"
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -30,6 +33,7 @@
     "@vitejs/plugin-react-swc": "^3.5.0",
     "chromatic": "^13.1.2",
     "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "eslint": "^8.57.0",
