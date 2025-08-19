@@ -12,7 +12,7 @@ export default defineConfig(() => {
     plugins: [react()],
     define: {
       __APP_VERSION__: JSON.stringify(version),
-      __BUILD_TIME__: JSON.stringify(new Date()),
+      __BUILD_TIME__: JSON.stringify(new Date().toLocaleDateString()),
     },
     build: {
       rollupOptions: {
