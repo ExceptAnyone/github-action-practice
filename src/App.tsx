@@ -1,20 +1,28 @@
-import { useState } from 'react';
-import './App.css';
+import { useState, useEffect } from "react";
+import "./App.css";
 
 interface AppProps {
   title?: string;
   showCounter?: boolean;
   initialCount?: number;
-  theme?: 'light' | 'dark';
+  theme?: "light" | "dark";
 }
 
 function App({
-  title = 'React + Storybook',
+  title = "React + Storybook",
   showCounter = true,
   initialCount = 0,
-  theme = 'light',
+  theme = "light",
 }: AppProps) {
   const [count, setCount] = useState(initialCount);
+
+  // 앱 버전 정보를 개발자 도구에 출력
+  useEffect(() => {
+    console.info("🚀 App Version:", __APP_VERSION__);
+    console.info("📅 Build Time:", __BUILD_TIME__);
+    console.info("🔧 Environment:", import.meta.env.MODE);
+    console.info("🌐 Current URL:", window.location.href);
+  }, []);
 
   return (
     <div className={`app ${theme}`}>
@@ -39,9 +47,16 @@ function App({
 
         <div className="info-section">
           <p>
-            Current environment: {import.meta.env.VITE_MY_NAME || 'Development'}
+            Current environment: {import.meta.env.VITE_MY_NAME || "Development"}
           </p>
           <p>Theme: {theme}</p>
+          <p className="version-info">
+            <strong>App Version:</strong> {__APP_VERSION__}
+          </p>
+          <p className="build-info">
+            <strong>Build Time:</strong>{" "}
+            {new Date(__BUILD_TIME__).toLocaleString()}
+          </p>
         </div>
       </header>
     </div>
