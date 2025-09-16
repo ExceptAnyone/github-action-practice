@@ -15,7 +15,6 @@ export const Button = ({
   backgroundColor,
   disabled = false,
   label,
-  onSuccess,
   ...props
 }: ButtonProps) => {
   const mode = primary
