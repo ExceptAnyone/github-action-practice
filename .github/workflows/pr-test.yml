@@ -29,49 +29,70 @@ jobs:
           if pnpm run type-check; then
             echo "✅ Type check passed" >> test_results.md
             echo "typecheck_status=✅ 성공" >> $GITHUB_OUTPUT
+            echo "typecheck_result=success" >> $GITHUB_OUTPUT
           else
             echo "❌ Type check failed" >> test_results.md
             echo "typecheck_status=❌ 실패" >> $GITHUB_OUTPUT
+            echo "typecheck_result=failure" >> $GITHUB_OUTPUT
+            exit 1
           fi
-        continue-on-error: true
 
       - name: Run lint
         id: lint
+        if: steps.typecheck.outputs.typecheck_result == 'success'
         run: |
           echo "" >> test_results.md
           echo "## 📝 Lint Check" >> test_results.md
           if pnpm run lint; then
             echo "✅ Lint check passed" >> test_results.md
             echo "lint_status=✅ 성공" >> $GITHUB_OUTPUT
+            echo "lint_result=success" >> $GITHUB_OUTPUT
           else
             echo "❌ Lint check failed" >> test_results.md
             echo "lint_status=❌ 실패" >> $GITHUB_OUTPUT
+            echo "lint_result=failure" >> $GITHUB_OUTPUT
+            exit 1
           fi
-        continue-on-error: true
 
       - name: Run test
         id: test
+        if: steps.lint.outputs.lint_result == 'success'
         run: |
           echo "" >> test_results.md
           echo "## 🧪 Tests" >> test_results.md
           if pnpm run test; then
             echo "✅ Tests passed" >> test_results.md
             echo "test_status=✅ 성공" >> $GITHUB_OUTPUT
+            echo "test_result=success" >> $GITHUB_OUTPUT
           else
             echo "❌ Tests failed" >> test_results.md
             echo "test_status=❌ 실패" >> $GITHUB_OUTPUT
+            echo "test_result=failure" >> $GITHUB_OUTPUT
+            exit 1
           fi
-        continue-on-error: true
 
       - name: Get current time
         uses: josStorer/get-current-time@v2
         id: current-time
+        if: always()
         with:
           format: 'YYYY년 MM월 DD일 HH시 mm분 ss초'
           utcOffset: '+09:00'
 
+      - name: Set skipped statuses
+        if: always()
+        run: |
+          if [[ "${{ steps.typecheck.outputs.typecheck_result }}" != "success" ]]; then
+            echo "lint_status=⏭️ 건너뜀" >> $GITHUB_OUTPUT
+            echo "test_status=⏭️ 건너뜀" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.lint.outputs.lint_result }}" != "success" ]]; then
+            echo "test_status=⏭️ 건너뜀" >> $GITHUB_OUTPUT
+          fi
+        id: skipped
+
       - name: Comment PR with test results
         uses: thollander/actions-comment-pull-request@v2
+        if: always()
         with:
           comment_tag: ${{ github.event.number }}-test-results
           message: |
@@ -81,9 +102,9 @@ jobs:
             **커밋**: ${{ github.event.pull_request.head.sha }}
 
             ### 📊 요약
-            - **Type Check**: ${{ steps.typecheck.outputs.typecheck_status }}
-            - **Lint**: ${{ steps.lint.outputs.lint_status }}
-            - **Tests**: ${{ steps.test.outputs.test_status }}
+            - **Type Check**: ${{ steps.typecheck.outputs.typecheck_status || '⏭️ 건너뜀' }}
+            - **Lint**: ${{ steps.lint.outputs.lint_status || steps.skipped.outputs.lint_status || '⏭️ 건너뜀' }}
+            - **Tests**: ${{ steps.test.outputs.test_status || steps.skipped.outputs.test_status || '⏭️ 건너뜀' }}
 
             ---
 
