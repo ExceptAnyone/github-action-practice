@@ -112,6 +112,23 @@ jobs:
         id: skipped
 
       # ---------------------------
+      # 테스트 결과 파일 읽기
+      # ---------------------------
+      - name: Read test results
+        if: always()
+        id: read-results
+        run: |
+          if [ -f test_results.md ]; then
+            {
+              echo 'test_results_content<<EOF'
+              cat test_results.md
+              echo EOF
+            } >> $GITHUB_OUTPUT
+          else
+            echo 'test_results_content=테스트 결과를 찾을 수 없습니다.' >> $GITHUB_OUTPUT
+          fi
+
+      # ---------------------------
       # PR 코멘트 작성
       # ---------------------------
       - name: Comment PR with test results
@@ -132,4 +149,4 @@ jobs:
 
             ---
 
-            $(cat test_results.md)
+            ${{ steps.read-results.outputs.test_results_content }}
