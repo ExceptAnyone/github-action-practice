@@ -107,5 +107,3 @@ jobs:
             - **Tests**: ${{ steps.test.outputs.test_status || steps.skipped.outputs.test_status || '⏭️ 건너뜀' }}
 
             ---
-
-            $(cat test_results.md)
