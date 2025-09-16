@@ -18,7 +18,7 @@ describe("Button", () => {
   });
 
   it("renders with large size when specified", () => {
-    render(<Button label="Large Button" size="large" />);
+    render(<Button label="Large" size="large" />);
 
     const button = screen.getByRole("button", { name: /large button/i });
     expect(button).toHaveClass("storybook-button--large");
