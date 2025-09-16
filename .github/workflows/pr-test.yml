@@ -1,0 +1,90 @@
+name: PR Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/pnpm-setup-node
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run type check
+        id: typecheck
+        run: |
+          echo "## 🔍 Type Check" >> test_results.md
+          if pnpm run type-check; then
+            echo "✅ Type check passed" >> test_results.md
+            echo "typecheck_status=✅ 성공" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Type check failed" >> test_results.md
+            echo "typecheck_status=❌ 실패" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+      - name: Run lint
+        id: lint
+        run: |
+          echo "" >> test_results.md
+          echo "## 📝 Lint Check" >> test_results.md
+          if pnpm run lint; then
+            echo "✅ Lint check passed" >> test_results.md
+            echo "lint_status=✅ 성공" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Lint check failed" >> test_results.md
+            echo "lint_status=❌ 실패" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+      - name: Run test
+        id: test
+        run: |
+          echo "" >> test_results.md
+          echo "## 🧪 Tests" >> test_results.md
+          if pnpm run test; then
+            echo "✅ Tests passed" >> test_results.md
+            echo "test_status=✅ 성공" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Tests failed" >> test_results.md
+            echo "test_status=❌ 실패" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+      - name: Get current time
+        uses: josStorer/get-current-time@v2
+        id: current-time
+        with:
+          format: 'YYYY년 MM월 DD일 HH시 mm분 ss초'
+          utcOffset: '+09:00'
+
+      - name: Comment PR with test results
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          comment_tag: ${{ github.event.number }}-test-results
+          message: |
+            ## 🚀 테스트 결과
+
+            **실행 시간**: ${{ steps.current-time.outputs.formattedTime }}
+            **커밋**: ${{ github.event.pull_request.head.sha }}
+
+            ### 📊 요약
+            - **Type Check**: ${{ steps.typecheck.outputs.typecheck_status }}
+            - **Lint**: ${{ steps.lint.outputs.lint_status }}
+            - **Tests**: ${{ steps.test.outputs.test_status }}
+
+            ---
+
+            $(cat test_results.md)
