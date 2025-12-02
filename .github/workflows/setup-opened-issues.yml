@@ -43,15 +43,10 @@ jobs:
               '훅': '훅',
             };
 
-            const feTeam = ['hoyyChoi', 'ExceptAnyone', 'jaeyoung-kwon', 'jin123457', 'Beomtae', 'Db0111', 'eunsoA', 'jeongYou'];
-
             const prefix = Object.keys(titleLabelMap).find(title => title.startsWith(title));
-            const author = issue.user.login;
-            const authorLabel = feTeam.includes(author) ? 'fe' : null;
 
             const labels = [];
             if (prefix) labels.push(titleLabelMap[prefix]);
-            if (authorLabel) labels.push(authorLabel);
 
             if (labels.length) {
               await github.rest.issues.addLabels({
