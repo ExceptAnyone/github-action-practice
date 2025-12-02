@@ -40,7 +40,7 @@ jobs:
 
             const titleLabelMap = {
               '컴포넌트': '컴포넌트 개발',
-              '훅': '훅',
+              '훅': '훅 개발',
             };
 
             const prefix = Object.keys(titleLabelMap).find(title => title.startsWith(title));
