@@ -43,7 +43,7 @@ jobs:
               '훅': '훅 개발',
             };
 
-            const prefix = Object.keys(titleLabelMap).find(title => title.startsWith(title));
+            const prefix = Object.keys(titleLabelMap).find(keyword => title.includes(keyword));
 
             const labels = [];
             if (prefix) labels.push(titleLabelMap[prefix]);
